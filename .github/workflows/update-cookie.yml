@@ -1,38 +1,33 @@
-name: Update Cookie
+name: Fetch Cookie
 
 on:
   schedule:
-    - cron: '*/30 * * * *'   # Every 30 minutes
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  update-cookie:
+  fetch:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 18
 
-      - name: Install dependencies
-        run: npm install axios fs
+      - name: Install deps
+        run: npm install axios
 
-      - name: Run fetch-cookie.js
-        run: node fetch-cookie.js
+      - name: Run script
+        env:
+          HIDDEN_API_URL: ${{ secrets.HIDDEN_API_URL }}
+        run: node index.js
 
-      - name: Commit and Push if Changed
+      - name: Commit cookie
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
           git add cookie.json
-          git diff --cached --quiet || git commit -m "Auto update cookie"
+          git commit -m "Auto update cookie" || echo "No changes"
           git push
