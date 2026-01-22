@@ -1,48 +1,46 @@
 const axios = require('axios');
 const fs = require('fs');
 
-// 🔒 URL hidden & controlled via environment variable
+// 🔒 Secure URL (set via environment variable)
 const url = process.env.HIDDEN_API_URL;
 
 if (!url) {
-  console.error('❌ HIDDEN_API_URL is not set');
+  console.error('HIDDEN_API_URL not set');
   process.exit(1);
 }
 
 axios.get(url)
-  .then(response => {
-    const data = response.data;
+  .then(res => {
+    const data = res.data;
 
     if (!Array.isArray(data)) {
-      console.error('❌ Expected JSON array from API.');
+      console.error('API response is not an array');
       process.exit(1);
     }
 
     if (!data[0] || !data[0].cookie) {
-      console.error('❌ Cookie not found');
+      console.error('Cookie not found in API response');
       process.exit(1);
     }
 
     let cookie = data[0].cookie;
 
-    // Remove "__hdnea__=" if already exists
-    if (cookie.startsWith('__hdnea__=')) {
-      cookie = cookie.replace('__hdnea__=', '');
-    }
+    // Remove hdnea prefix if already exists
+    cookie = cookie.replace(/^(__hdnea__=|hdnea=)/, '');
 
-    const formatted = {
+    const output = {
       cookieHeader: `__hdnea__=${cookie}`
     };
 
     fs.writeFileSync(
       'cookie.json',
-      JSON.stringify(formatted, null, 2),
+      JSON.stringify(output, null, 2),
       'utf8'
     );
 
-    console.log('✅ cookie.json updated successfully');
+    console.log('cookie.json updated successfully');
   })
-  .catch(error => {
-    console.error('❌ Error:', error.message);
+  .catch(err => {
+    console.error('Request failed:', err.message);
     process.exit(1);
   });
