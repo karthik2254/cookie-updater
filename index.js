@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 
-// 🔒 Secure URL (set via environment variable)
+// 🔒 URL is hidden using GitHub Secret / Environment Variable
 const url = process.env.HIDDEN_API_URL;
 
 if (!url) {
@@ -19,13 +19,13 @@ axios.get(url)
     }
 
     if (!data[0] || !data[0].cookie) {
-      console.error('Cookie not found in API response');
+      console.error('Cookie not found');
       process.exit(1);
     }
 
     let cookie = data[0].cookie;
 
-    // Remove hdnea prefix if already exists
+    // Remove existing prefix if present
     cookie = cookie.replace(/^(__hdnea__=|hdnea=)/, '');
 
     const output = {
